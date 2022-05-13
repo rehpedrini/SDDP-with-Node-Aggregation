@@ -92,19 +92,7 @@ fph = pd.read_csv(file,sep=";",index_col=0,header=0)
 file = os.path.join(path,'Sistema Fredo/produtividade.csv')
 prod = pd.read_csv(file,sep=";",index_col=0,header=0)
 
-#### HISTÓRICO AFLUÊNCIA ########################################
-file = os.path.join(path,'Sistema Fredo/HISTORICO_AFLUENCIA_MES_ANO.csv')
-hist = pd.read_csv(file,sep=";",index_col=0,header=0)
-file = os.path.join(path,'Sistema Fredo/HISTORICO_AFLUENCIA_MES_ANO_BACIA.csv')
-hist_bacia = pd.read_csv(file,sep=";",index_col=0,header=0)
-file = os.path.join(path,'Sistema Fredo/COEFICIENTE_PARTICIPACAO.csv')
-coef_part = pd.read_csv(file,sep=";",index_col=0,header=0)
 #### PATAMAR DE CARGA ###############################################
-# file = os.path.join(path,'Sistema Fredo/PATAMAR_ESTAGIO_v1.csv')
-# patamar = pd.read_csv(file,sep=";",index_col=0,header=0)
-# patamar['DATA'] = [dt.datetime(patamar['ANO'][c],patamar['MES'][c],1) for c in patamar.index]
-# patamar = patamar.drop(columns=['ANO','MES'])
-# patamar = patamar.set_index('DATA')
 file = os.path.join(path,'Sistema Fredo/SUBMERCADO_AttMatrizPremissa_PorPeriodoPorIdPatamarCarga_sempat.csv')
 patamar = pd.read_csv(file,sep=";",index_col=0,header=0)
 patamar.Iteradores = pd.to_datetime(patamar.Iteradores)
