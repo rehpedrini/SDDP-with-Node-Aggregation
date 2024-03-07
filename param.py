@@ -18,7 +18,12 @@ import random as rd
 import datetime as dt
 # from sorteio_v3 import sorteio
 import os
+pasta_atual = os.getcwd()
 
+# Construindo o caminho para a subpasta de dados
+caminho_dados = os.path.join(pasta_atual, 'sistema_grande')
+caminho_PAR = os.path.join(pasta_atual, 'ProcessoEstocasticoHidrologico_usina')
+caminho_resultados = os.path.join(pasta_atual, 'results')
 # T = 2
 # start_month = dt.datetime(2020,11,1)
 start_month = dt.datetime(2020,1,1)
@@ -39,9 +44,6 @@ cz = 3600*24*30/1000000
 ordem = 1;seed = 1;ordem = 1;mc = 0;det = 0;fph_flag = 0;sort_dist=0;flag_2per=0;
 lhs_flag=1;flag_2020=0;cut_selection=1;fim_percurso = 0;bacia = 0
 # import_cuts = 0;simu = 0
-path = 'D:\Dropbox\Renata Pedrini (1)\SDDP-Agregada\Dados'
-path1 = 'D:\Dropbox\Renata Pedrini (1)\SDDP-Agregada/Gurobi/novo_sistema'
-# path2 = 'D:/Renata/Doutorado/DRO/Dados'
 #################### Dados FPH #################################
 # linhas = [28,28,28,20]
 # usinas = ['Campos Novos','Barra Grande', 'Machadinho', 'Itá']
@@ -51,68 +53,63 @@ path1 = 'D:\Dropbox\Renata Pedrini (1)\SDDP-Agregada/Gurobi/novo_sistema'
 ###############################################################
 
 ########################################## Leitura de Dados #######################################################################
-# file = os.path.join(path,'Sistema Fredo/HIDRELETRICA_v2.csv')
-file = os.path.join(path,'Sistema Fredo/HIDRELETRICA.csv')
+file = os.path.join(caminho_dados,'HIDRELETRICA.csv')
 data = pd.read_csv(file,sep=";",index_col=0,header=0) 
 hidros = data[(data.USINA_EM_OPERACAO == 1)]
 reservatorios = hidros[(hidros.USINA_FIO_DAGUA==0)].index
 fiodagua = hidros[(hidros.USINA_FIO_DAGUA==1)].index
 v0 = {h: hidros.loc[h]['VOLUME_INICIAL']*(hidros.loc[h]['VOLUME_MAXIMO_OPERACIONAL']-hidros.loc[h]['VOLUME_MINIMO_OPERACIONAL'])/100 for h in reservatorios}
 ### TERMELÉTRICAS ############################################################################
-file = os.path.join(path,'Sistema Fredo/TERMELETRICA.csv')
-# file = os.path.join(path,'Sistema Fredo/TERMELETRICA_v1.csv')
+file = os.path.join(caminho_dados,'TERMELETRICA.csv')
 data = pd.read_csv(file,sep=";",index_col=0,header=0)
 termos = data[(data.USINA_EM_OPERACAO == 1)]
 
 ########### DEMANDA #################################################
-# file = os.path.join(path,'Sistema Fredo/DEMANDA_ESTAGIO_v1.csv')
-file = os.path.join(path,'Sistema Fredo/DEMANDA_ESTAGIO_v6.csv')
-# file = os.path.join(path,'Sistema Fredo/DEMANDA_ESTAGIO_10anos.csv')
-# file = os.path.join(path,'Sistema Fredo/DEMANDA_ESTAGIO_toy.csv')
+file = os.path.join(caminho_dados,'DEMANDA_ESTAGIO.csv')
 demanda = pd.read_csv(file,sep=";",index_col=0,header=0)
 demanda['DATA'] = [dt.datetime(demanda['ANO'][c],demanda['MES'][c],1) for c in demanda.index]
 demanda = demanda.drop(columns=['ANO','MES'])
 demanda = demanda.set_index('DATA')
 
 ########### PROCESSO ESTOCASTICO #################################################
-file = os.path.join(path,'Sistema Fredo/VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
+file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
 f = pd.read_csv(file,sep=";",index_col=0,header=0).fillna(0)
 
 
 ########### FPH #################################################
 ## FPH SPT
-# file = os.path.join(path,'Sistema Fredo/HIDRELETRICA_FPH.csv')
+# file = os.path.join(path,'/HIDRELETRICA_FPH.csv')
 # fph = pd.read_csv(file,sep=";",index_col=0,header=0)
 ## FPH Fredo
-file = os.path.join(path,'Sistema Fredo/FUNCAO_PRODUCAO_HIDRELETRICA_FPH1.csv')
+file = os.path.join(caminho_dados,'FUNCAO_PRODUCAO_HIDRELETRICA_FPH1.csv')
 fph = pd.read_csv(file,sep=";",index_col=0,header=0)
 
 ####### produtividade constante ##################################
-# file = os.path.join(path,'Sistema Fredo/produtividade_small_system.csv')
-file = os.path.join(path,'Sistema Fredo/produtividade.csv')
+# file = os.path.join(caminho_dados,'/produtividade_small_system.csv')
+file = os.path.join(caminho_dados,'produtividade.csv')
 prod = pd.read_csv(file,sep=";",index_col=0,header=0)
 
 #### PATAMAR DE CARGA ###############################################
-file = os.path.join(path,'Sistema Fredo/SUBMERCADO_AttMatrizPremissa_PorPeriodoPorIdPatamarCarga_sempat.csv')
+file = os.path.join(caminho_dados,'SUBMERCADO_AttMatrizPremissa_PorPeriodoPorIdPatamarCarga_sempat.csv')
 patamar = pd.read_csv(file,sep=";",index_col=0,header=0)
 patamar.Iteradores = pd.to_datetime(patamar.Iteradores)
-file = os.path.join(path,'Sistema Fredo/DADOS_AttMatrizOperacional_PorPeriodoPorIdPatamarCarga_sempat.csv')
+file = os.path.join(caminho_dados,'DADOS_AttMatrizOperacional_PorPeriodoPorIdPatamarCarga_sempat.csv')
 duracao_patamar = pd.read_csv(file,sep=";",index_col=0,header=0)
 duracao_patamar['Iteradores'] = pd.to_datetime(duracao_patamar['Iteradores'])
-file = os.path.join(path,'Sistema Fredo/SUBMERCADO_PATAMAR_DEFICIT_AttMatrizOperacional_PorPeriodoPorIdPatamarCarga.csv')
+file = os.path.join(caminho_dados,'SUBMERCADO_PATAMAR_DEFICIT_AttMatrizOperacional_PorPeriodoPorIdPatamarCarga.csv')
 cd =  pd.read_csv(file,sep=";",index_col=0,header=0)
 cd = cd[(cd.AttMatriz == 'custo')]
 cd.Iteradores = pd.to_datetime(cd.Iteradores)
 ########### PROCESSO ESTOCASTICO #################################################
 if bacia == 0:
-    file = os.path.join(path,f'Sistema Fredo/ProcessoEstocasticoHidrologico_{seed}/VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
     f = pd.read_csv(file,sep=";",index_col=0,usecols=[0,2,3],header=0).fillna(0)
     f.Iteradores = pd.to_datetime(f.Iteradores)
     f = f[(f.index.isin(hidros.COMPATIBILIDADE_SPT.values))]
-    file = os.path.join(path,f'Sistema Fredo/ProcessoEstocasticoHidrologico_{seed}/VARIAVEL_ALEATORIA_INTERNA_grau_liberdade.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_INTERNA_grau_liberdade.csv')
     gl = pd.read_csv(file,sep=";",index_col=0,header=0)
     gl= gl[(gl.index.isin(hidros.COMPATIBILIDADE_SPT.values))]
-    file = os.path.join(path,f'Sistema Fredo/ProcessoEstocasticoHidrologico_{seed}/VARIAVEL_ALEATORIA_INTERNA_tendencia_temporal.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_INTERNA_tendencia_temporal.csv')
     y_hist = pd.read_csv(file,sep=";",index_col=0,header=0)
     y_hist.columns = y_hist.columns[:3].tolist() + pd.to_datetime(y_hist.columns[3:]).tolist()
     y_hist = y_hist[(y_hist.index.isin(hidros.COMPATIBILIDADE_SPT.values))]
@@ -128,15 +125,15 @@ if bacia == 0:
     # f = f.set_index('novo index')
     h_agreg = hidros.index
 else:
-    file = os.path.join(path,'Sistema Fredo/ProcessoEstocasticoHidrologico_bacia/VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_coeficiente_linear_auto_correlacao.csv')
     f = pd.read_csv(file,sep=";",index_col=0,header=0).fillna(0)
     f.Iteradores = pd.to_datetime(f.Iteradores)
-    file = os.path.join(path,'Sistema Fredo/ProcessoEstocasticoHidrologico_bacia/VARIAVEL_ALEATORIA_INTERNA_grau_liberdade.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_INTERNA_grau_liberdade.csv')
     gl = pd.read_csv(file,sep=";",index_col=0,header=0)
     gl_aux = gl.sum(level=0)
     gl = gl.set_index('idVariavelAleatoriaInterna')
     # gl.columns = gl.columns[:2].tolist() + pd.to_datetime(gl.columns[2:]).tolist()
-    file = os.path.join(path,'Sistema Fredo/ProcessoEstocasticoHidrologico_bacia/VARIAVEL_ALEATORIA_INTERNA_tendencia_temporal.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_INTERNA_tendencia_temporal.csv')
     y_hist = pd.read_csv(file,sep=";",index_col=0,header=0)
     y_hist.columns = y_hist.columns[:3].tolist() + pd.to_datetime(y_hist.columns[3:]).tolist()
     y_hist = y_hist.sum(level=0)
@@ -146,7 +143,7 @@ else:
     for t in y_hist.columns:
         y_hist[t]=y_hist[t]-gl_aux.valor
 ######### PERÍODO - ESTÁGIO #############################################
-file = os.path.join(path,'Sistema Fredo/DADOS_periodo_estagio.csv')
+file = os.path.join(caminho_dados,'DADOS_periodo_estagio.csv')
 g = pd.read_csv(file,sep=";",index_col=0,header=0)
 T = g.duracao.sum()
 # T = 4
@@ -154,7 +151,7 @@ T = g.duracao.sum()
 # num_d = len(g);
 #### RESÍDUOS ###################################################
 if bacia == 0:
-    file = os.path.join(path,f'Sistema Fredo/ProcessoEstocasticoHidrologico_{seed}/VARIAVEL_ALEATORIA_residuo_espaco_amostral.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_residuo_espaco_amostral.csv')
     res = pd.read_csv(file,sep=";",index_col=0,header=0)
     res.Iteradores = pd.to_datetime(res.Iteradores)
     res = res[(res.index.isin(hidros.COMPATIBILIDADE_SPT.values))]
@@ -163,7 +160,7 @@ if bacia == 0:
     # res.reset_index(inplace=True)
     # res = res.set_index('novo index')
 else:
-    file = os.path.join(path,'Sistema Fredo/ProcessoEstocasticoHidrologico_bacia/VARIAVEL_ALEATORIA_residuo_espaco_amostral.csv')
+    file = os.path.join(caminho_PAR,'VARIAVEL_ALEATORIA_residuo_espaco_amostral.csv')
     res = pd.read_csv(file,sep=";",index_col=0,header=0)
     res.Iteradores = pd.to_datetime(res.Iteradores)
     

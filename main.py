@@ -14,7 +14,7 @@ from tree import tree
 from mpi4py import MPI
 
 from param import *
-from forward_AR import forward
+from forward import forward
 from backward import backward
 from modelo import modelo
 
@@ -76,7 +76,7 @@ for j in range(1,len(g)):
         cuts[j][a]=[];
 
 # while time_stop<7200:
-for o in range(5):
+for o in range(1):
     if para==0 and o>1:break
     # vsult_s[o] = {}; custo_s[o] = {};ysult_s[o] = {};
     sampled_scenarios = []
@@ -157,6 +157,7 @@ for o in range(5):
         tempo_selecao[o][j]={};tempo_selecao_adicao[o][j]={};
         for s in cen:
             tempo_aux[j][s][1]={} ## 1 indica backward
+            
     t=start_month+relativedelta(months=T)
     sub_resolve = {};
     for j in range(2,stages+1):
@@ -181,7 +182,6 @@ for o in range(5):
         if cut_selection==1:
             tempo_selecao_aux = time.time()
             corrected_list[j-1],vetor_v[j-1],vetor_i[j-1] = cut_selection_func(corrected_list[j-1],cortes[j-1],vetor_v[j-1],vetor_i[j-1]) 
-            print(corrected_list)
             tempo_selecao[o][j][rank] = time.time()-tempo_selecao_aux
             tempo_selecao_aux2 = time.time()
             stage[j-1][f'm{j-1}'].remove(cuts[j-1])
@@ -203,7 +203,7 @@ for o in range(5):
 
         stage[j-1][f'm{j-1}'].update();resolve[o] = sub_resolve
         
-        stage[j-1][f'm{j-1}'].write(f'modelo{j-1}_3.lp')
+        # stage[j-1][f'm{j-1}'].write(f'modelo{j-1}_3.lp')
     # tempo_fase[o][1] = time.time() - temp
     if rank >= 1:
         comm.send(tempo_aux, dest=0, tag=rank)
@@ -228,7 +228,7 @@ for k in range(o):
             df['s'].append(s)
             df['tempo'].append(tempo_selecao[k][j][s])
 df = pd.DataFrame(df)
-df.to_csv(os.path.join(path1,f'tempo_selecao{rank}.csv'),sep = ';')
+df.to_csv(os.path.join(caminho_resultados,f'tempo_selecao{rank}.csv'),sep = ';')
 df = {'o':[],'j':[],'s':[],'tempo':[]}
 for k in range(o):
     for j in tempo_selecao[k]:
@@ -239,7 +239,7 @@ for k in range(o):
             df['s'].append(s)
             df['tempo'].append(tempo_selecao_adicao[k][j][s])
 df = pd.DataFrame(df)
-df.to_csv(os.path.join(path1,f'tempo_selecao_adicao{rank}.csv'),sep = ';')
+df.to_csv(os.path.join(caminho_resultados,f'tempo_selecao_adicao{rank}.csv'),sep = ';')
 df = {'j':[],'num cortes':[],'cortes':[]}
 for j in corrected_list:
         if j==1:continue
@@ -247,7 +247,7 @@ for j in corrected_list:
         df['cortes'].append(corrected_list[j])
         df['num cortes'].append(len(corrected_list[j]))
 df = pd.DataFrame(df)
-df.to_csv(os.path.join(path1,f'selecao{rank}.csv'),sep = ';')
+df.to_csv(os.path.join(caminho_resultados,f'selecao{rank}.csv'),sep = ';')
 
 
 if rank==0:
@@ -259,8 +259,8 @@ if rank==0:
     t6 = pd.DataFrame([custo_inf[-1]], columns = ['custo otimo'])
     # t7 = pd.DataFrame([custo_sup[-1]], columns = ['custo superior'])
     t = pd.concat([t1,t2,t3,t4,t5,t6],axis=1)
-    # t.to_csv(os.path.join(path1,f'evolution_{stages}_{seed}_{phi}_{abert}.csv'),sep = ';')
-    t.to_csv(os.path.join(path1,f'evolution_{stages}_{seed}_{abert}.csv'),sep = ';')
+    # t.to_csv(os.path.join(caminho_resultados,f'evolution_{stages}_{seed}_{phi}_{abert}.csv'),sep = ';')
+    t.to_csv(os.path.join(caminho_resultados,f'evolution_{stages}_{seed}_{abert}.csv'),sep = ';')
 
 
     df = {'o':[],'tempo':[],'j':[],'custo':[]}
@@ -286,7 +286,7 @@ if rank==0:
                   
     df = pd.DataFrame(df)
     cols=df.columns[4:]
-    df.to_csv(os.path.join(path1,f'cortes_{stages}_{seed}_v3.csv'),sep = ';')  
+    df.to_csv(os.path.join(caminho_resultados,f'cortes_{stages}_{seed}_v3.csv'),sep = ';')  
     df = {'o':[],'fase':[],'tempo':[],}
     for k in range(o):
         for fase in [0,1]:
@@ -294,7 +294,7 @@ if rank==0:
             df['fase'].append(fase)
             df['tempo'].append(tempo_fase[k][fase])
     df = pd.DataFrame(df)
-    df.to_csv(os.path.join(path1,f'tempo_fase_{stages}_{seed}.csv'),sep = ';')   
+    df.to_csv(os.path.join(caminho_resultados,f'tempo_fase_{stages}_{seed}.csv'),sep = ';')   
     df = {'o':[],'j':[],'s':[],'fase':[],'abertura':[],'tempo':[]}
     for k in range(o):
         for j in tempo[k]:
@@ -318,7 +318,7 @@ if rank==0:
                             df['abertura'].append(i)
                             df['tempo'].append(tempo[k][j][s][fase][i])
     df = pd.DataFrame(df)
-    df.to_csv(os.path.join(path1,f'tempo_{stages}_{seed}.csv'),sep = ';')
+    df.to_csv(os.path.join(caminho_resultados,f'tempo_{stages}_{seed}.csv'),sep = ';')
     df = {'o':[],'j':[],'s':[],'fase':[],'abertura':[],'tempo':[],'restricoes':[],'variaveis':[]}
     for k in range(o):
         for j in tempo[k]:
@@ -346,7 +346,7 @@ if rank==0:
                             df['restricoes'].append(tempo[k][j][s][fase][i][1])
                             df['variaveis'].append(tempo[k][j][s][fase][i][2])
     df = pd.DataFrame(df)
-    df.to_csv(os.path.join(path1,f'tempo_{stages}_{seed}.csv'),sep = ';')
+    df.to_csv(os.path.join(caminho_resultados,f'tempo_{stages}_{seed}.csv'),sep = ';')
     
     df = {'o':[],'j':[],'abertura':[],'resolve':[]}
     for k in range(o):
@@ -357,4 +357,4 @@ if rank==0:
             df['abertura'] = df['abertura'] + list(np.arange(abert))
             df['resolve'] = df['resolve'] + list(resolve[k][j])
     df = pd.DataFrame(df)
-    df.to_csv(os.path.join(path1,f'subproblemas_resolvidos_{stages}_{seed}.csv'),sep = ';')
+    df.to_csv(os.path.join(caminho_resultados,f'subproblemas_resolvidos_{stages}_{seed}.csv'),sep = ';')

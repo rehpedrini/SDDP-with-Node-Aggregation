@@ -36,8 +36,8 @@ def backward(t,j,tempo_aux,stage,res,stages,cen,g,runtime_limite,sub_resolve):
             
             # stage[j][f'm{j}'].write(f'SDDP_back{j}{i}{sev}.lp')
             # stage[j][f'm{j}'].write(f'SDDP_back{j}{i}{sev}.sol')
-            stage[j][f'm{j}'].write(f'SDDP_back_{j}{i}_v4.lp')
-            stage[j][f'm{j}'].write(f'SDDP_back_{j}{i}_v4.sol')
+            # stage[j][f'm{j}'].write(f'SDDP_back_{j}{i}_v4.lp')
+            # stage[j][f'm{j}'].write(f'SDDP_back_{j}{i}_v4.sol')
             tempo_aux[j][s][1][i] = np.zeros(3)
             # tempo_aux[j][s][1][i] = stage[j][f'm{j}'].runtime
             tempo_aux[j][s][1][i][0] = stage[j][f'm{j}'].runtime
