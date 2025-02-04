@@ -1,5 +1,5 @@
 # SDDP with Node Aggregation
  
-# Este repositório contém os desenvolvimentos referentes
-# à SDDP com agregação de nós
-# Este código é a versão síncrona do algoritimo
+# This repository contains the developments regarding
+# SDDP with node aggregation
+# This code is the synchronous version of the algorithm
